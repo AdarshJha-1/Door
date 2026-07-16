@@ -30,6 +30,12 @@ func main() {
 		}
 	})
 
+	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
+		log.Println(r.Method, r.URL.String())
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Healthy Server"))
+	})
+
 	server := &http.Server{
 		Addr:    ":8000",
 		Handler: mux,
