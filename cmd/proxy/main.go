@@ -1,8 +1,12 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/AdarshJha-1/Door/internal/backend"
@@ -32,9 +36,22 @@ func main() {
 		Handler: mux,
 	}
 
-	log.Println("server is running...")
-	if err := server.ListenAndServe(); err != nil {
+	done := make(chan os.Signal, 1)
+
+	signal.Notify(done, syscall.SIGTERM, syscall.SIGINT)
+
+	go func() {
+		log.Println("server is running...")
+		if err := server.ListenAndServe(); err != nil {
+			log.Fatal(err)
+		}
+	}()
+	<-done
+	log.Println("shutting down...")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := server.Shutdown(ctx); err != nil {
 		log.Fatal(err)
 	}
-
+	log.Println("server stopped")
 }
