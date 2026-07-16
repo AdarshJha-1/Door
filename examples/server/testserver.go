@@ -4,10 +4,14 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
-
+	args := os.Args
+	if len(args) != 3 {
+		log.Fatal("args 1st -> PORT (:8000), 2nd -> name, ", len(args))
+	}
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /users", func(w http.ResponseWriter, r *http.Request) {
@@ -37,11 +41,11 @@ func main() {
 	})
 
 	server := &http.Server{
-		Addr:    ":8000",
+		Addr:    args[1],
 		Handler: mux,
 	}
 
-	log.Println("server is running...")
+	log.Printf("server %s is running...\n", args[2])
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}
